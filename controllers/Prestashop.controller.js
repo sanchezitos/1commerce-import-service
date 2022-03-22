@@ -118,6 +118,7 @@ let getVariations = (credentials, listing) => {
             let combinations;
             let external_id;
             let products = await services.Prestashop.getData(credentials,listing);
+            let count = await services.Prestashop.getCount(credentials);
             let optionsCms = await services.Prestashop.getOptions(credentials);
             let quantities = await services.Prestashop.getQuantities(credentials);
             let attributes = await services.Prestashop.getAttributes(credentials);
@@ -188,8 +189,8 @@ let getVariations = (credentials, listing) => {
             }
             
             let rs = {
-                totalRecords: listing.pageSize,
-                pagesCount: Math.ceil((listing.pagination.pageSize / listing.pagination.pageSize)),
+                totalRecords :count.products.length,
+                pagesCount : Math.ceil((count.products.length / listing.pagination.pageSize)),
                 data : variations || []
             }
             return resolve(rs);
