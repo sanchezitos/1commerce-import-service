@@ -61,7 +61,7 @@ let getProducts = (credentials, listing) => {
                         for (let index = 0; index < array_id_images.length; index++) {
                             let id_img=array_id_images[index].id;
                             let file=id_img+'.jpg';
-                            let src=credentials.url+`/${id_img}-extra_large_default/${products[i].link_rewrite}.jpg`;                      
+                            let src=credentials.url+`/${id_img}-home_default/${products[i].link_rewrite}.jpg`;                      
                             let obj={        
                                 file,
                                 src
@@ -232,7 +232,6 @@ let getProductId = (credentials, productId) => {
             }
             if(product){
                 let array_id_images=product.associations.images;
-                console.log(array_id_images=product.associations.images);
                 let id_images=[];
                 product.images={};
                 if(array_id_images){

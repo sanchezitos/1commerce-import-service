@@ -9,12 +9,10 @@ let init = (app, locals) => {
     models = locals.models;
     logger.info("Initialization started.");
 
-
     locals.controllers = locals.controllers || {}
 
     locals.controllers.WooCommerce = {
         getProducts,
-        getVariations,
         getImages,
         getPagination,
         getProductId,
@@ -56,17 +54,16 @@ let getProducts = (credentials, listing) => {
             let findTax = (taxClass, taxes)=>{
                 return tax.data.filter((c) => c.name.toLowerCase() === taxClass.toLowerCase());
             }
-
-            let results = response.data.map((p)=>{
+            let products = response.data.filter(product => product.status == "publish")
+            products = await productsColor(credentials, products);
+            let results = products.map((p)=>{
                 let tx = findTax(p.tax_class, tax);
-
                 if(!tx || tx.length == 0){
                     p.tax = tax.data.filter(t=>t.class === 'standard')[0]
                 }
 
                 return p;
             });
-
 
             resolve({
                 totalRecords : (response.headers['x-wp-total']),
@@ -75,12 +72,51 @@ let getProducts = (credentials, listing) => {
             });
 
         } catch (error) {
-            reject(error);
+            resolve({});
         }
     });
 }
 
-let getVariations = (credentials, pro) => {
+let productsColor = async (credentials, products) => {
+    let resultProducts = [];
+    for (let product of products) {
+        if (product.type == 'simple') {
+            resultProducts.push(product);
+        } else {
+            let existColors = getColors(product);
+            if (existColors.length > 0) {
+                const name = product.name;
+                let variationsColor = await getVariationsProduct(credentials, product);
+                for (const variat of variationsColor) {
+                    let colorVariation = getColors(variat);
+                    if (colorVariation.length > 0) {
+                        resultProducts.push({
+                            ...product,
+                            id: variat.id,
+                            sku: variat.sku + '-' + colorVariation[0].replace(/\s/g, ''),
+                            name: name + ' ' + colorVariation[0].replace(/\s/g, '')
+                        });
+                    }
+                }
+            } else {
+                resultProducts.push(product);
+            }
+        }
+    }
+    return resultProducts; 
+}
+
+let getColors = (product) => {
+    let existColors = []
+    if(product.attributes && product.attributes.length > 0){
+        let attrs = product.attributes;
+        let color = attrs.filter(o=>(o.name.toLowerCase() === 'color' || o.name.toLowerCase() === 'color_primario'))[0];
+        existColors = color ? color.options ? color.options : [color.option] : []
+    }
+    return existColors;
+}
+
+let getVariationsProduct = (credentials, pro) => {
     return new Promise(async (resolve, reject) => {
         try {
             credentials.queryStringAuth = true;
@@ -88,24 +124,21 @@ let getVariations = (credentials, pro) => {
             let WooCommerce = new services.WooCommerceRestApi(credentials);
             let products = await WooCommerce.get(`products/${pro.id}/variations`);
             let tax = await WooCommerce.get("taxes");
-            
             let findTax = (taxClass, taxes)=>{
                 return tax.data.filter((c) => c.name.toLowerCase() === taxClass.toLowerCase());
             }
 
             let results = products.data.map((p)=>{
                 let tx = findTax(p.tax_class, tax);
-
                 if(!tx || tx.length == 0){
                     p.tax = tax.data.filter(t=>t.class === 'standard')[0]
                 }
-
                 return p;
             });
             resolve(results)
 
         } catch (error) {
-            reject(error);
+            resolve([]);
         }
     });
 }
@@ -128,11 +161,14 @@ let getProductId = (credentials, id) => {
             if(!tx || tx.length == 0){
                 products.data.tax = tax.data.filter(t=>t.class === 'standard')[0];
             }
-            if (products && products.data) {
-                return resolve(products.data);
-            }
 
-            resolve([])
+            let product = products.data && products.data.status == "publish" ? products.data : {};
+            const resultProducts = product.id ? await productColor(credentials, product) : [];
+
+            let rs = {
+                data: resultProducts
+            }
+            return resolve(rs);
 
         } catch (error) {
             reject(error);
@@ -140,23 +176,140 @@ let getProductId = (credentials, id) => {
     });
 }
 
-let getImages = (credentials, productId) => {
+let productColor = async (credentials, product) => {
+    let resultProducts = [];
+    if (product.type == 'simple') {
+        let variations = await getVariationsProduct(credentials, product);
+        resultProducts.push({...product, variations: variations});
+    } else {
+        let existColors = getColors(product);
+        if (existColors.length > 0) {
+            const name = product.name;
+            let variationsColor = await getVariationsProduct(credentials, product);
+            for (const variat of variationsColor) {
+                let colorVariation = getColors(variat);
+                if (colorVariation.length > 0) {
+                    resultProducts.push({
+                        ...product,
+                        id: variat.id,
+                        sku: variat.sku + '-' + colorVariation[0].replace(/\s/g, ''),
+                        name: name + ' ' + colorVariation[0].replace(/\s/g, ''),
+                        images: variat.image ? [variat.image] : variat.images,
+                        variants: []
+                    });
+                }
+            }
+        } else {
+            let variations = await getVariationsProduct(credentials, product);
+            resultProducts.push({...product, variations: variations});
+        }
+    }
+    return resultProducts; 
+}
+
+let getVariations = (credentials, listing) => {
     return new Promise(async (resolve, reject) => {
         try {
             credentials.queryStringAuth = true;
             credentials.verifySsl =  false;
             let WooCommerce = new services.WooCommerceRestApi(credentials);
-            let product = await WooCommerce.get(`products/${productId}`);
-            if (product && product.data.images) {
-                return resolve({data: product.data.images});
-            }
+            let response = await WooCommerce.get("products", { per_page: listing.pagination.pageSize, page: listing.pagination.page });  
+            let products = response.data.filter(product => product.status == "publish")
+            products = await variantsColor(credentials, products);
 
-            resolve({data: []})
+            let rs = {
+                totalRecords: (response.headers['x-wp-total']),
+                pagesCount: parseInt(response.headers['x-wp-totalpages']),
+                data: products || []
+            }
+            resolve(rs)
+            
+        } catch (error) {
+            resolve({});
+        }
+    });
+}
+
+let variantsColor = async (credentials, products) => {
+    let resultProducts = [];
+    for (let product of products) {
+        if (product.type == 'simple') {
+            let variations = await getVariationsProduct(credentials, product);
+            resultProducts.push({...product, variations: variations});
+        } else {
+            let existColors = getColors(product);
+            if (existColors.length > 0) {
+                const name = product.name;
+                let variationsColor = await getVariationsProduct(credentials, product);
+                for (const variat of variationsColor) {
+                    let colorVariation = getColors(variat);
+                    if (colorVariation.length > 0) {
+                        resultProducts.push({
+                            ...product,
+                            id: variat.id,
+                            sku: variat.sku + '-' + colorVariation[0].replace(/\s/g, ''),
+                            name: name + ' ' + colorVariation[0].replace(/\s/g, ''),
+                            variations: []
+                        });
+                    }
+                }
+            } else {
+                let variations = await getVariationsProduct(credentials, product);
+                resultProducts.push({...product, variations: variations});
+            }
+        }
+    }
+    return resultProducts;
+}
+
+let getImages = async (credentials, listing) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            credentials.queryStringAuth = true;
+            credentials.verifySsl =  false;
+            let WooCommerce = new services.WooCommerceRestApi(credentials);
+            let response = await WooCommerce.get("products", { per_page: listing.pagination.pageSize, page: listing.pagination.page });  
+            let products = response.data.filter(product => product.status == "publish")
+            products = await imageColor(credentials, products);
+
+            let rs = {
+                totalRecords: (response.headers['x-wp-total']),
+                pagesCount: parseInt(response.headers['x-wp-totalpages']),
+                data: products || []
+            }
+            resolve(rs)
 
         } catch (error) {
             reject(error);
         }
     });
+}
+
+let imageColor = async (credentials, products) => {
+    let resultProducts = [];
+    for (let product of products) {
+        if (product.type == 'simple') {
+            resultProducts.push(product);
+        } else {
+            let existColors = getColors(product);
+            if (existColors.length > 0) {
+                let variationsColor = await getVariationsProduct(credentials, product);
+                for (const variat of variationsColor) {
+                    let colorVariation = getColors(variat);
+                    if (colorVariation.length > 0) {
+                        resultProducts.push({
+                            ...product,
+                            id: variat.id,
+                            images: variat.image ? [variat.image] : variat.images
+                        });
+                    }
+                }
+            } else {
+                resultProducts.push(product);
+            }
+        }
+    }
+    return resultProducts;
 }
 
 let getOrderId = (credentials, orderId) => {
@@ -221,4 +374,4 @@ let updateWebhook = (credentials,webhookId, webhook) => {
     });
 }
 
-module.exports = { init, getPagination, getProducts, getVariations, getImages, getProductId, getOrderId, addWebhook, updateWebhook };
+module.exports = { init, getPagination, getProducts, getVariations,getVariationsProduct, getImages, getProductId, getOrderId, addWebhook, updateWebhook };
