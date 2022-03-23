@@ -86,17 +86,13 @@ let productsColor = async (credentials, products) => {
             let existColors = getColors(product);
             if (existColors.length > 0) {
                 const name = product.name;
-                let variationsColor = await getVariationsProduct(credentials, product);
-                for (const variat of variationsColor) {
-                    let colorVariation = getColors(variat);
-                    if (colorVariation.length > 0) {
-                        resultProducts.push({
-                            ...product,
-                            id: variat.id,
-                            sku: variat.sku + '-' + colorVariation[0].replace(/\s/g, ''),
-                            name: name + ' ' + colorVariation[0].replace(/\s/g, '')
-                        });
-                    }
+                for (const color of existColors) {
+                    resultProducts.push({
+                        ...product,
+                        id: product.id + '-' + color.replace(/\s/g, ''),
+                        sku: product.sku + '-' + color.replace(/\s/g, ''),
+                        name: name + ' ' + color.replace(/\s/g, '')
+                    });
                 }
             } else {
                 resultProducts.push(product);
@@ -186,18 +182,22 @@ let productColor = async (credentials, product) => {
         if (existColors.length > 0) {
             const name = product.name;
             let variationsColor = await getVariationsProduct(credentials, product);
-            for (const variat of variationsColor) {
-                let colorVariation = getColors(variat);
-                if (colorVariation.length > 0) {
-                    resultProducts.push({
-                        ...product,
-                        id: variat.id,
-                        sku: variat.sku + '-' + colorVariation[0].replace(/\s/g, ''),
-                        name: name + ' ' + colorVariation[0].replace(/\s/g, ''),
-                        images: variat.image ? [variat.image] : variat.images,
-                        variants: []
-                    });
-                }
+            for (const color of existColors) {
+                let variat =variationsColor.filter(p => {
+                    let colorVariation = getColors(p);
+                    if (colorVariation[0] == color) {
+                        return p;
+                    }
+                })
+                let imagesProduct = product.image ? [product.image] : product.images;
+                resultProducts.push({
+                    ...product,
+                    id: product.id + '-' + color.replace(/\s/g, ''),
+                    sku: product.sku + '-' + color.replace(/\s/g, ''),
+                    name: name + ' ' + color.replace(/\s/g, ''),
+                    variations: variat,
+                    images: variat.length > 0 && variat[0].image ? [variat[0].image] : variat.length > 0 ? variat[0].images : imagesProduct
+                });
             }
         } else {
             let variations = await getVariationsProduct(credentials, product);
@@ -241,17 +241,20 @@ let variantsColor = async (credentials, products) => {
             if (existColors.length > 0) {
                 const name = product.name;
                 let variationsColor = await getVariationsProduct(credentials, product);
-                for (const variat of variationsColor) {
-                    let colorVariation = getColors(variat);
-                    if (colorVariation.length > 0) {
-                        resultProducts.push({
-                            ...product,
-                            id: variat.id,
-                            sku: variat.sku + '-' + colorVariation[0].replace(/\s/g, ''),
-                            name: name + ' ' + colorVariation[0].replace(/\s/g, ''),
-                            variations: []
-                        });
-                    }
+                for (const color of existColors) {
+                    let variat =variationsColor.filter(p => {
+                        let colorVariation = getColors(p);
+                        if (colorVariation[0] == color) {
+                            return p;
+                        }
+                    })
+                    resultProducts.push({
+                        ...product,
+                        id: product.id + '-' + color.replace(/\s/g, ''),
+                        sku: product.sku + '-' + color.replace(/\s/g, ''),
+                        name: name + ' ' + color.replace(/\s/g, ''),
+                        variations: variat
+                    });
                 }
             } else {
                 let variations = await getVariationsProduct(credentials, product);
@@ -294,15 +297,19 @@ let imageColor = async (credentials, products) => {
             let existColors = getColors(product);
             if (existColors.length > 0) {
                 let variationsColor = await getVariationsProduct(credentials, product);
-                for (const variat of variationsColor) {
-                    let colorVariation = getColors(variat);
-                    if (colorVariation.length > 0) {
-                        resultProducts.push({
-                            ...product,
-                            id: variat.id,
-                            images: variat.image ? [variat.image] : variat.images
-                        });
-                    }
+                for (const color of existColors) {  
+                    let variat = variationsColor.filter(p => {
+                        let colorVariation = getColors(p);
+                        if (colorVariation[0] == color) {
+                            return p;
+                        }
+                    })
+                    let imagesProduct = product.image ? [product.image] : product.images;
+                    resultProducts.push({
+                        ...product,
+                        id: product.id + '-' + color.replace(/\s/g, ''),
+                        images: variat.length > 0 && variat[0].image ? [variat[0].image] : variat.length > 0 ? variat[0].images : imagesProduct
+                    });
                 }
             } else {
                 resultProducts.push(product);
