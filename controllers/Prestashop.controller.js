@@ -42,16 +42,18 @@ let getProducts = (credentials, listing) => {
             let products = response.products.filter(product => product.active == '1')
             if(products){
                 for (let i = 0; i < products.length; i++) {
-                    for (const option of products[i].associations.product_option_values) {
-                        let optColor = optionColor.find(a => a.id == option.id);
-                        let optMarca = optionMarca.find(a => a.id == option.id);
-                        if (optColor) {
-                            let attr = attributes.product_option_values.find(a => a.id == optColor.id);
-                            products[i].color = attr.name;
-                        }
-                        if (!products[i].manufacturer_name && optMarca) {
-                            let attr = attributes.product_option_values.find(a => a.id == optMarca.id);
-                            products[i].manufacturer_name = attr.name;
+                    if (products[i].associations.product_option_values && products[i].associations.product_option_values.length > 0) {
+                        for (const option of products[i].associations.product_option_values) {
+                            let optColor = optionColor.find(a => a.id == option.id);
+                            let optMarca = optionMarca.find(a => a.id == option.id);
+                            if (optColor) {
+                                let attr = attributes.product_option_values.find(a => a.id == optColor.id);
+                                products[i].color = attr.name;
+                            }
+                            if (!products[i].manufacturer_name && optMarca) {
+                                let attr = attributes.product_option_values.find(a => a.id == optMarca.id);
+                                products[i].manufacturer_name = attr.name;
+                            }
                         }
                     }
                     let array_id_images=products[i].associations.images;
@@ -158,11 +160,13 @@ let getVariations = (credentials, listing) => {
                     
                     if (combinations) {
                         for (let i = 0; i < combinations.length; i++) {
-                            for (const option of combinations[i].associations.product_option_values) {
-                                let optionTalla = optionTallas.find(a => a.id == option.id);
-                                if (optionTalla) {
-                                    let attr = attributes.product_option_values.find(a => a.id == optionTalla.id);
-                                    combinations[i].talla = attr.name;
+                            if (combinations[i].associations.product_option_values && combinations[i].associations.product_option_values.length > 0) {
+                                for (const option of combinations[i].associations.product_option_values) {
+                                    let optionTalla = optionTallas.find(a => a.id == option.id);
+                                    if (optionTalla) {
+                                        let attr = attributes.product_option_values.find(a => a.id == optionTalla.id);
+                                        combinations[i].talla = attr.name;
+                                    }
                                 }
                             }
                             let id_variation=combinations[i].id;
@@ -270,17 +274,18 @@ let getProductId = (credentials, productId) => {
                         }
                     };
                 });
-
-                for (const option of product.associations.product_option_values) {
-                    let optColor = optionColor.find(a => a.id == option.id);
-                    let optMarca = optionMarca.find(a => a.id == option.id);
-                    if (optColor) {
-                        let attr = attributes.product_option_values.find(a => a.id == optColor.id);
-                        product.color = attr.name;
-                    }
-                    if (!product.manufacturer_name && optMarca) {
-                        let attr = attributes.product_option_values.find(a => a.id == optMarca.id);
-                        product.manufacturer_name = attr.name;
+                if (product.associations.product_option_values && product.associations.product_option_values.length > 0) {
+                    for (const option of product.associations.product_option_values) {
+                        let optColor = optionColor.find(a => a.id == option.id);
+                        let optMarca = optionMarca.find(a => a.id == option.id);
+                        if (optColor) {
+                            let attr = attributes.product_option_values.find(a => a.id == optColor.id);
+                            product.color = attr.name;
+                        }
+                        if (!product.manufacturer_name && optMarca) {
+                            let attr = attributes.product_option_values.find(a => a.id == optMarca.id);
+                            product.manufacturer_name = attr.name;
+                        }
                     }
                 }
 
@@ -308,11 +313,13 @@ let getProductId = (credentials, productId) => {
                 
                 if (combinations) {
                     for (let i = 0; i < combinations.length; i++) {
-                        for (const option of combinations[i].associations.product_option_values) {
-                            let optionTalla = optionTallas.find(a => a.id == option.id);
-                            if (optionTalla) {
-                                let attr = attributes.product_option_values.find(a => a.id == optionTalla.id);
-                                combinations[i].talla = attr.name;
+                        if (combinations[i].associations.product_option_values && combinations[i].associations.product_option_values.length > 0) {
+                            for (const option of combinations[i].associations.product_option_values) {
+                                let optionTalla = optionTallas.find(a => a.id == option.id);
+                                if (optionTalla) {
+                                    let attr = attributes.product_option_values.find(a => a.id == optionTalla.id);
+                                    combinations[i].talla = attr.name;
+                                }
                             }
                         }
                         let id_variation=combinations[i].id;

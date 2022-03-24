@@ -3,7 +3,7 @@ var router = express.Router();
 const { pubsub }  = require('../services/pubsub.service');
 const { WOOCOMMERCE_PRODUCTS,  WOOCOMMERCE_ORDERS}  = require('../graphql/schemas/subscriptions/events');
 
-router.post('/updated_product/woocommerce/:key/:separate_product_by_color', async (req, res)=>{
+router.post('/updated_product/woocommerce/:key', async (req, res)=>{
   let key = req.params.key;
   let data = {
     productId: req.body.id,
