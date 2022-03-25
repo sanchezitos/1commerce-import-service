@@ -214,6 +214,7 @@ let getVariations = (credentials, listing) => {
             credentials.verifySsl =  false;
             let WooCommerce = new services.WooCommerceRestApi(credentials);
             let response = await WooCommerce.get("products", { per_page: listing.pagination.pageSize, page: listing.pagination.page });  
+            console.log(response.data.length);
             let products = response.data.filter(product => product.status == "publish")
             products = await variantsColor(credentials, products);
 
@@ -225,6 +226,7 @@ let getVariations = (credentials, listing) => {
             resolve(rs)
             
         } catch (error) {
+            console.log(error);
             resolve({});
         }
     });
@@ -232,35 +234,39 @@ let getVariations = (credentials, listing) => {
 
 let variantsColor = async (credentials, products) => {
     let resultProducts = [];
-    for (let product of products) {
-        if (product.type == 'simple') {
-            let variations = await getVariationsProduct(credentials, product);
-            resultProducts.push({...product, variations: variations});
-        } else {
-            let existColors = getColors(product);
-            if (existColors.length > 0) {
-                const name = product.name;
-                let variationsColor = await getVariationsProduct(credentials, product);
-                for (const color of existColors) {
-                    let variat =variationsColor.filter(p => {
-                        let colorVariation = getColors(p);
-                        if (colorVariation[0] == color) {
-                            return p;
-                        }
-                    })
-                    resultProducts.push({
-                        ...product,
-                        id: product.id + '-' + color.replace(/\s/g, ''),
-                        sku: product.sku + '-' + color.replace(/\s/g, ''),
-                        name: name + ' ' + color.replace(/\s/g, ''),
-                        variations: variat
-                    });
-                }
-            } else {
+    try {
+        for (let product of products) {
+            if (product.type == 'simple') {
                 let variations = await getVariationsProduct(credentials, product);
                 resultProducts.push({...product, variations: variations});
+            } else {
+                let existColors = getColors(product);
+                if (existColors.length > 0) {
+                    const name = product.name;
+                    let variationsColor = await getVariationsProduct(credentials, product);
+                    for (const color of existColors) {
+                        let variat =variationsColor.filter(p => {
+                            let colorVariation = getColors(p);
+                            if (colorVariation[0] == color) {
+                                return p;
+                            }
+                        })
+                        resultProducts.push({
+                            ...product,
+                            id: product.id + '-' + color.replace(/\s/g, ''),
+                            sku: product.sku + '-' + color.replace(/\s/g, ''),
+                            name: name + ' ' + color.replace(/\s/g, ''),
+                            variations: variat
+                        });
+                    }
+                } else {
+                    let variations = await getVariationsProduct(credentials, product);
+                    resultProducts.push({...product, variations: variations});
+                }
             }
         }
+    } catch (error) {
+        console.log(error);
     }
     return resultProducts;
 }
