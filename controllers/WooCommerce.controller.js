@@ -214,7 +214,6 @@ let getVariations = (credentials, listing) => {
             credentials.verifySsl =  false;
             let WooCommerce = new services.WooCommerceRestApi(credentials);
             let response = await WooCommerce.get("products", { per_page: listing.pagination.pageSize, page: listing.pagination.page });  
-            console.log(response.data.length);
             let products = response.data.filter(product => product.status == "publish")
             products = await variantsColor(credentials, products);
 
@@ -353,7 +352,6 @@ let addWebhook = (credentials, webhook) => {
             let WooCommerce = new services.WooCommerceRestApi(credentials);
               
             let response = await WooCommerce.post("webhooks", webhook);
-           
             if (response && response.data) {
                 return resolve(response.data);
             }
@@ -387,4 +385,48 @@ let updateWebhook = (credentials,webhookId, webhook) => {
     });
 }
 
-module.exports = { init, getPagination, getProducts, getVariations,getVariationsProduct, getImages, getProductId, getOrderId, addWebhook, updateWebhook };
+let updateVariation = (credentials, productId, variationId, data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            credentials.queryStringAuth = true;
+            credentials.verifySsl =  false;
+            let WooCommerce = new services.WooCommerceRestApi(credentials);
+            if (productId === variationId ) {
+                let response = await WooCommerce.put(`products/${parseInt(productId)}`, {
+                    stock_quantity: data.quantity,
+                    regular_price: data.price
+                });
+                if (response && response.data) {
+                    return resolve(response.data);
+                }
+            } else {
+                let response = await WooCommerce.put(`products/${parseInt(productId)}/variations/${parseInt(variationId)}`, {
+                    stock_quantity: data.quantity,
+                    regular_price: data.price
+                });
+                if (response && response.data) {
+                    return resolve(response.data);
+                }
+            }
+
+            resolve({});
+
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+module.exports = { 
+    init,
+    getPagination,
+    getProducts,
+    getVariations,
+    getVariationsProduct,
+    getImages,
+    getProductId,
+    getOrderId,
+    addWebhook,
+    updateWebhook,
+    updateVariation
+};

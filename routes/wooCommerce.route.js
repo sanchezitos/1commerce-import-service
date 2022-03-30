@@ -3,17 +3,15 @@ var router = express.Router();
 const { pubsub }  = require('../services/pubsub.service');
 const { WOOCOMMERCE_PRODUCTS,  WOOCOMMERCE_ORDERS}  = require('../graphql/schemas/subscriptions/events');
 
-router.post('/updated_product/woocommerce/:key', async (req, res)=>{
+router.post('/created_product/woocommerce/:key', async (req, res)=>{
   let key = req.params.key;
   let data = {
     productId: req.body.id,
     key,
-    channel: 'woocommerce',
-    separate_product_by_color : req.params.separate_product_by_color  ? true : false
+    channel: 'woocommerce'
   };
 
   pubsub.publish(WOOCOMMERCE_PRODUCTS, { WoocommerceProducts: data });
-
   res.status(200).end();
 });
 
@@ -46,7 +44,5 @@ router.post('/updated_order/woocommerce/:key', async (req, res)=>{
   res.status(200).end();
   
 });
-
-
 
 module.exports = router;

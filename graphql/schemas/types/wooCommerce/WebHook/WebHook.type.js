@@ -1,8 +1,6 @@
 const {
     GraphQLObjectType,
-    GraphQLString,
-    GraphQLInt,
-    GraphQLList
+    GraphQLString
   } = require('graphql');
 
   const WebHookStatus  = require('./Status.type');

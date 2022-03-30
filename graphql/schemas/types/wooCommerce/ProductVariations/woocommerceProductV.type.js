@@ -42,6 +42,7 @@ let WoocommerceProductVType = new GraphQLObjectType({
       if (!obj.variations || obj.variations.length === 0) {
         let price = obj.regular_price ? parseInt(obj.regular_price == "" ? 0 : obj.regular_price) :  parseInt(obj.price);
         return [{
+          id: obj.id,
           sku: obj.sku,
           ean13: obj.ean13 || '0',
           price: price,
