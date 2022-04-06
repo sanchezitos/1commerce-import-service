@@ -5,7 +5,7 @@ const {
 } = require('graphql');
 
 const { addWebhook, updateWebhook, updateVariation } = require('../../../controllers/WooCommerce.controller');
-const { addWebhookShopify, deleteWebhookShopify } = require('../../../controllers/Shopify.controller');
+const { addWebhookShopify, deleteWebhookShopify, updateVariationShopify, updateVariationStock } = require('../../../controllers/Shopify.controller');
 const { addWebhookVtex, deleteWebhookVtex } = require('../../../controllers/Vtex.controller');
 const { getToken, validate}  = require('../../../util/auth.util');
 
@@ -18,8 +18,10 @@ const WebHookShopifyInputType = require('./inputs/webhookShopify.input');
 const WebHookVtexInputType = require('./inputs/webhookVtex.input');
 
 // Se agrega funcion type para actualizar inventarios
-const UpdateVariationInputType = require('./inputs/types/woocommerce/updateVariation.input');
-const UpdateVariationType = require('../types/wooCommerce/Mutations/updateProduct.type');
+const UpdateVariationInputType = require('./inputs/updateVariation.input');
+const WoocommerceUpdateVariationType = require('../types/wooCommerce/Mutations/WoocommerceUpdateProduct.type');
+const ShopifyUpdateVariationType = require('../types/shopify/Mutations/ShopifyupdateProduct.type');
+const ShopifyUpdateProductStockType = require('../types/shopify/Mutations/ShopifyupdateProductStock.type');
 
 const mutations = new GraphQLObjectType({
   name: 'RootMutations',
@@ -172,7 +174,7 @@ const mutations = new GraphQLObjectType({
     },
     updateVariationWoocommerce: {
       description: "update variations woocommerce",
-      type: UpdateVariationType,
+      type: WoocommerceUpdateVariationType,
       args: {
         productId: {type: GraphQLID},
         variationId: {type: GraphQLID},
@@ -192,6 +194,58 @@ const mutations = new GraphQLObjectType({
         context.req = credentials;
         
         let variation = await updateVariation(credentials, args.productId, args.variationId, args.input);
+          
+        return variation;
+      }
+    },
+    updateVariationShopify: {
+      description: "update variations shopify",
+      type: ShopifyUpdateVariationType,
+      args: {
+        productId: {type: GraphQLID},
+        variationId: {type: GraphQLID},
+        input: {type: UpdateVariationInputType}
+      },
+      resolve: async (root, args, context) => {
+        let token = getToken(context.req);
+        if(!token){
+          throw new Error("Auth error token no provided");
+        }
+        let credentials = validate(token);
+        if(!credentials){
+          throw new Error("Invalid credential data");
+        }
+
+        delete credentials.iat;
+        context.req = credentials;
+        
+        let variation = await updateVariationShopify(credentials, args.productId, args.variationId, args.input);
+          
+        return variation;
+      }
+    },
+    updateVariationShopifyStock: {
+      description: "update variations shopify stock",
+      type: ShopifyUpdateProductStockType,
+      args: {
+        productId: {type: GraphQLID},
+        variationId: {type: GraphQLID},
+        input: {type: UpdateVariationInputType}
+      },
+      resolve: async (root, args, context) => {
+        let token = getToken(context.req);
+        if(!token){
+          throw new Error("Auth error token no provided");
+        }
+        let credentials = validate(token);
+        if(!credentials){
+          throw new Error("Invalid credential data");
+        }
+
+        delete credentials.iat;
+        context.req = credentials;
+        
+        let variation = await updateVariationStock(credentials, args.productId, args.variationId, args.input);
           
         return variation;
       }

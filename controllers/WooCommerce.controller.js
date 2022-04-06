@@ -394,7 +394,7 @@ let updateVariation = (credentials, productId, variationId, data) => {
             if (productId === variationId ) {
                 let response = await WooCommerce.put(`products/${parseInt(productId)}`, {
                     stock_quantity: data.quantity,
-                    regular_price: data.price
+                    regular_price: String(data.price)
                 });
                 if (response && response.data) {
                     return resolve(response.data);
@@ -402,7 +402,7 @@ let updateVariation = (credentials, productId, variationId, data) => {
             } else {
                 let response = await WooCommerce.put(`products/${parseInt(productId)}/variations/${parseInt(variationId)}`, {
                     stock_quantity: data.quantity,
-                    regular_price: data.price
+                    regular_price: String(data.price)
                 });
                 if (response && response.data) {
                     return resolve(response.data);

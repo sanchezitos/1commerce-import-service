@@ -372,4 +372,70 @@ let deleteWebhookShopify = (credentials, webhookId) => {
     });
 }
 
-module.exports = { init, getPagination, getProducts, getVariations, getImages, getDiscount, getProductId, getOrderId, addWebhookShopify, deleteWebhookShopify};
+let updateVariationShopify = (credentials, productId, variationId, data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let result = await services.Shopify.updateVariationPrice({
+                shopName: credentials.shopName,
+                apiKey: credentials.apiKey,
+                password: credentials.password,
+                version: credentials.version
+            }, {
+                variant: {
+                    id: variationId,
+                    price: data.price
+                }
+            }, variationId);
+
+            let variationShopify = result || {};
+            return resolve(variationShopify);
+        } catch (error) {
+            resolve(null);
+        }
+    });
+}
+
+let updateVariationStock = (credentials, productId, variationId, data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let result;
+
+            let variation = await services.Shopify.getVariation({
+                shopName: credentials.shopName,
+                apiKey: credentials.apiKey,
+                password: credentials.password,
+                version: credentials.version
+            }, variationId);
+
+            if (variation && variation.inventory_item_id) {
+                let inventory = await services.Shopify.getListInventory({
+                    shopName: credentials.shopName,
+                    apiKey: credentials.apiKey,
+                    password: credentials.password,
+                    version: credentials.version
+                }, variation.inventory_item_id);
+
+                if (inventory) {
+                    let response = await services.Shopify.updateVariationStock({
+                        shopName: credentials.shopName,
+                        apiKey: credentials.apiKey,
+                        password: credentials.password,
+                        version: credentials.version
+                    }, {
+                        location_id: inventory.location_id,
+                        inventory_item_id: inventory.inventory_item_id,
+                        available: data.quantity
+                    });
+                    result = response;
+                }
+            }
+
+            let variationShopifyStock = result || {};
+            return resolve(variationShopifyStock);
+        } catch (error) {
+            resolve(null);
+        }
+    });
+}
+
+module.exports = { init, getPagination, getProducts, getVariations, getImages, getDiscount, getProductId, getOrderId, addWebhookShopify, deleteWebhookShopify, updateVariationShopify, updateVariationStock};

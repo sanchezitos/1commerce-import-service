@@ -4,8 +4,8 @@ const {
   GraphQLBoolean
 } = require('graphql');
 
-let UpdateProductType = new GraphQLObjectType({
-  name: 'UpdateProductType',
+let WoocommerceUpdateProductType = new GraphQLObjectType({
+  name: 'WoocommerceUpdateProductType',
   fields: () => ({
     name: { type: GraphQLString},
     externalId: { type: GraphQLString,  resolve:(obj, args, context, info)=>{
@@ -20,4 +20,4 @@ let UpdateProductType = new GraphQLObjectType({
   }),
 });
 
-module.exports = UpdateProductType;
+module.exports = WoocommerceUpdateProductType;

@@ -16,7 +16,11 @@ let init = async (app, locals) => {
                 getProductId,
                 getOrderId,
                 addWebhook,
-                deleteWebhook
+                deleteWebhook,
+                updateVariationPrice,
+                getVariation,
+                getListInventory,
+                updateVariationStock
             };
             logger.info(`shopify service done.`);
             return resolve();
@@ -136,6 +140,46 @@ let deleteWebhook = (credentials, webhookId) => {
         let response = await axios.delete(`https://${credentials.apiKey}:${credentials.password}@${credentials.shopName}/admin/api/${credentials.version}/webhooks/${webhookId}.json`).catch(e => console.log(e) && resolve(null))
         if(response){
             return resolve('Ok');
+        }
+        resolve(null);
+    });
+}
+
+let updateVariationPrice = (credentials, data, id) => {
+    return new Promise(async (resolve, reject) => {
+        let response = await axios.put(`https://${credentials.apiKey}:${credentials.password}@${credentials.shopName}/admin/api/${credentials.version}/variants/${id}.json`, data).catch(e => console.log(e.response.data) && resolve(null))
+        if(response && response.data){
+            return resolve(response.data.variant);
+        }
+        resolve(null);
+    });
+}
+
+let getVariation = (credentials, id) => {
+    return new Promise(async (resolve, reject) => {
+        let response = await axios.get(`https://${credentials.apiKey}:${credentials.password}@${credentials.shopName}/admin/api/${credentials.version}/variants/${id}.json?fields=id,inventory_item_id`).catch(e => console.log(e.response.data) && resolve(null))
+        if(response && response.data){
+            return resolve(response.data.variant);
+        }
+        resolve(null);
+    });
+}
+
+let getListInventory = (credentials, inventory) => {
+    return new Promise(async (resolve, reject) => {
+        let response = await axios.get(`https://${credentials.apiKey}:${credentials.password}@${credentials.shopName}/admin/api/${credentials.version}/inventory_levels.json?inventory_item_ids=${inventory}`).catch(e => console.log(e.response.data) && resolve(null))
+        if(response && response.data){
+            return resolve(response.data.inventory_levels[0]);
+        }
+        resolve(null);
+    });
+}
+
+let updateVariationStock = (credentials, data) => {
+    return new Promise(async (resolve, reject) => {
+        let response = await axios.post(`https://${credentials.apiKey}:${credentials.password}@${credentials.shopName}/admin/api/${credentials.version}/inventory_levels/set.json`, data).catch(e => console.log(e.response.data) && resolve(null))
+        if(response && response.data){
+            return resolve(response.data.inventory_level);
         }
         resolve(null);
     });
