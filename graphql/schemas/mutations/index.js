@@ -6,7 +6,7 @@ const {
 
 const { addWebhook, updateWebhook, updateVariation } = require('../../../controllers/WooCommerce.controller');
 const { addWebhookShopify, deleteWebhookShopify, updateVariationShopify, updateVariationStock } = require('../../../controllers/Shopify.controller');
-const { addWebhookVtex, deleteWebhookVtex } = require('../../../controllers/Vtex.controller');
+const { addWebhookVtex, deleteWebhookVtex, updateVariationStockVtex, updateVariationPriceVtex } = require('../../../controllers/Vtex.controller');
 const { getToken, validate}  = require('../../../util/auth.util');
 
 const WoocommerceWebHookType = require('../types/wooCommerce/WebHook/WebHook.type');
@@ -17,11 +17,13 @@ const WebHookInputType = require('./inputs/webhook.input');
 const WebHookShopifyInputType = require('./inputs/webhookShopify.input');
 const WebHookVtexInputType = require('./inputs/webhookVtex.input');
 
-// Se agrega funcion type para actualizar inventarios
+// Se agrega funcion type para actualizar inventarios y precios
 const UpdateVariationInputType = require('./inputs/updateVariation.input');
 const WoocommerceUpdateVariationType = require('../types/wooCommerce/Mutations/WoocommerceUpdateProduct.type');
 const ShopifyUpdateVariationType = require('../types/shopify/Mutations/ShopifyupdateProduct.type');
 const ShopifyUpdateProductStockType = require('../types/shopify/Mutations/ShopifyupdateProductStock.type');
+const VtexUpdateProductStockType = require('../types/vtex/Mutations/VtexupdateProductStock.type');
+const VtexUpdateProductPriceType = require('../types/vtex/Mutations/VtextupdateProductPrice.type');
 
 const mutations = new GraphQLObjectType({
   name: 'RootMutations',
@@ -246,6 +248,58 @@ const mutations = new GraphQLObjectType({
         context.req = credentials;
         
         let variation = await updateVariationStock(credentials, args.productId, args.variationId, args.input);
+          
+        return variation;
+      }
+    },
+    updateVariationVtexStock: {
+      description: "update variations vtex stock",
+      type: VtexUpdateProductStockType,
+      args: {
+        productId: {type: GraphQLID},
+        variationId: {type: GraphQLID},
+        input: {type: UpdateVariationInputType}
+      },
+      resolve: async (root, args, context) => {
+        let token = getToken(context.req);
+        if(!token){
+          throw new Error("Auth error token no provided");
+        }
+        let credentials = validate(token);
+        if(!credentials){
+          throw new Error("Invalid credential data");
+        }
+
+        delete credentials.iat;
+        context.req = credentials;
+        
+        let variation = await updateVariationStockVtex(credentials, args.productId, args.variationId, args.input);
+          
+        return variation;
+      }
+    },
+    updateVariationPriceVtex: {
+      description: "update variations vtex price",
+      type: VtexUpdateProductPriceType,
+      args: {
+        productId: {type: GraphQLID},
+        variationId: {type: GraphQLID},
+        input: {type: UpdateVariationInputType}
+      },
+      resolve: async (root, args, context) => {
+        let token = getToken(context.req);
+        if(!token){
+          throw new Error("Auth error token no provided");
+        }
+        let credentials = validate(token);
+        if(!credentials){
+          throw new Error("Invalid credential data");
+        }
+
+        delete credentials.iat;
+        context.req = credentials;
+        
+        let variation = await updateVariationPriceVtex(credentials, args.productId, args.variationId, args.input);
           
         return variation;
       }

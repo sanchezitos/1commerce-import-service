@@ -23,7 +23,11 @@ let init = async (app, locals) => {
                 getSpecification,
                 getOrderId,
                 addHookOrder,
-                deleteHookOrder
+                deleteHookOrder,
+                getInventory,
+                getUpdateInventory,
+                getPrice,
+                getUpdatePrice
             };
 
             logger.info(`vtex service done.`);
@@ -463,5 +467,112 @@ let deleteHookOrder = (credentials) => {
         resolve(undefined);
     });
 }
+
+let getInventory = (credentials, skuId) => {
+    return new Promise(async (resolve, reject) => {
+        let response;
+        try {
+            const options = {
+                method: 'get',
+                url: `https://${credentials.shopName}.vtexcommercestable.com.br/api/logistics/pvt/inventory/skus/${skuId}`,
+                headers: {
+                  'content-type': 'application/json',
+                  accept: 'application/json',
+                  'x-vtex-api-appkey': credentials.apiKey,
+                  'x-vtex-api-apptoken': credentials.password
+                },
+                timeout: 60000
+            };
+            response = await axios(options)
+        } catch (error) {
+            console.log(error);
+        }
+        if(response && response.data && response.data.balance.length > 0){
+            return resolve(response.data.balance[0]);
+        }
+        resolve(undefined);
+    });
+}
+
+let getUpdateInventory = (credentials, skuId, warehouseId, data) => {
+    return new Promise(async (resolve, reject) => {
+        let response;
+        try {
+            const options = {
+                method: 'put',
+                url: `https://${credentials.shopName}.vtexcommercestable.com.br/api/logistics/pvt/inventory/skus/${skuId}/warehouses/${warehouseId}`,
+                headers: {
+                  'content-type': 'application/json',
+                  accept: 'application/json',
+                  'x-vtex-api-appkey': credentials.apiKey,
+                  'x-vtex-api-apptoken': credentials.password
+                },
+                timeout: 60000,
+                data: data
+            };
+            response = await axios(options)
+        } catch (error) {
+            console.log(error);
+        }
+        if(response && response.data){
+            return resolve(response.data);
+        }
+        resolve(undefined);
+    });
+}
+
+let getPrice = (credentials, skuId) => {
+    return new Promise(async (resolve, reject) => {
+        let response;
+        try {
+            const options = {
+                method: 'get',
+                url: `https://api.vtex.com/${credentials.shopName}/pricing/prices/${skuId}`,
+                headers: {
+                  'content-type': 'application/json',
+                  accept: 'application/json',
+                  'x-vtex-api-appkey': credentials.apiKey,
+                  'x-vtex-api-apptoken': credentials.password
+                },
+                timeout: 60000
+            };
+            response = await axios(options)
+        } catch (error) {
+            console.log(error);
+        }
+        if(response && response.data){
+            return resolve(response.data);
+        }
+        resolve(undefined);
+    });
+}
+
+let getUpdatePrice = (credentials, skuId, data) => {
+    return new Promise(async (resolve, reject) => {
+        let response;
+        try {
+            const options = {
+                method: 'put',
+                url: `https://api.vtex.com/${credentials.shopName}/pricing/prices/${skuId}`,
+                headers: {
+                  'content-type': 'application/json',
+                  accept: 'application/json',
+                  'x-vtex-api-appkey': credentials.apiKey,
+                  'x-vtex-api-apptoken': credentials.password
+                },
+                data: data,
+                timeout: 60000
+            };
+            response = await axios(options)
+        } catch (error) {
+            console.log(error);
+        }
+        if(response){
+            return resolve(response.statusText);
+        }
+        resolve(undefined);
+    });
+}
+
 
 module.exports = { init };

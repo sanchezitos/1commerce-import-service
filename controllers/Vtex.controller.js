@@ -148,7 +148,7 @@ let getPromotions = (credentials) => {
             apiKey: credentials.apiKey,
             password: credentials.password
           }, benefit);
-          if (promotion && !promotion.name.includes('NM-')) {
+          if (promotion) {
             result.push(promotion);
           }
         }
@@ -239,6 +239,7 @@ let getVariations = (credentials, listing) => {
             colletions.push(result);
           }
         }
+
         for (const element of data.productIds) {
           let variation = await services.Vtex.getVariations({
             shopName: credentials.shopName,
@@ -475,4 +476,69 @@ let deleteWebhookVtex = (credentials, webhookId) => {
   });
 }
 
-module.exports = { init, getPagination, getProducts, getVariations, getImages, getEan, getQuantity, getProductId, getSpecification, getOrderId, addWebhookVtex, deleteWebhookVtex };
+let updateVariationStockVtex = (credentials, productId, variationId, data) => {
+  return new Promise(async (resolve, reject) => {
+      try {
+          let result;
+          let inventory = await services.Vtex.getInventory({
+            shopName: credentials.shopName,
+            apiKey: credentials.apiKey,
+            password: credentials.password
+          }, variationId);
+
+          if (inventory) {
+            let response = await services.Vtex.getUpdateInventory({
+              shopName: credentials.shopName,
+              apiKey: credentials.apiKey,
+              password: credentials.password
+            }, variationId, inventory.warehouseId, {
+              quantity: data.quantity,
+              hasUnlimitedQuantity: inventory.hasUnlimitedQuantity,
+              timeToRefill: inventory.timeToRefill,
+            });
+            if (response) {
+              result = {warehouseName: inventory.warehouseName}
+            }
+          }
+          let variationVtexStock = result || {};
+          return resolve(variationVtexStock);
+      } catch (error) {
+          resolve(null);
+      }
+  });
+}
+
+let updateVariationPriceVtex = (credentials, productId, variationId, data) => {
+  return new Promise(async (resolve, reject) => {
+      try {
+          let result;
+          let price = await services.Vtex.getPrice({
+            shopName: credentials.shopName,
+            apiKey: credentials.apiKey,
+            password: credentials.password
+          }, variationId);
+
+          if (price) {
+            let response = await services.Vtex.getUpdatePrice({
+              shopName: credentials.shopName,
+              apiKey: credentials.apiKey,
+              password: credentials.password
+            }, variationId, {
+              markup: price.markup,
+              listPrice: data.price,
+              bestPrice: data.price,
+              costPrice: data.price
+            });
+            if (response) {
+              result = {skuId: price.itemId}
+            }
+          }
+          let variationVtexPrice = result || {};
+          return resolve(variationVtexPrice);
+      } catch (error) {
+          resolve(null);
+      }
+  });
+}
+
+module.exports = { init, getPagination, getProducts, getVariations, getImages, getEan, getQuantity, getProductId, getSpecification, getOrderId, addWebhookVtex, deleteWebhookVtex, updateVariationStockVtex, updateVariationPriceVtex};
