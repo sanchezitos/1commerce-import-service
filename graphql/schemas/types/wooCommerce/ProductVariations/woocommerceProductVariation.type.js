@@ -31,7 +31,7 @@ let WoocommerceProductVariationType = new GraphQLObjectType({
       return obj.sku
     }},
     ean13:{ type:GraphQLString, resolve:(obj, args, context, info)=>{
-      return '0'
+      return obj.ean13 || '0'
     }},
     skuId: { type:GraphQLString, resolve: async(obj, args, context, info)=>{
       return obj.id;

@@ -84,7 +84,7 @@ let productsColor = async (credentials, products) => {
             resultProducts.push(product);
         } else {
             let existColors = getColors(product);
-            if (existColors.length > 0) {
+            if (existColors.length > 1) {
                 const name = product.name;
                 for (const color of existColors) {
                     resultProducts.push({
@@ -147,7 +147,6 @@ let getProductId = (credentials, id) => {
             let WooCommerce = new services.WooCommerceRestApi(credentials);
             let products = await WooCommerce.get(`products/${id}`);
             let tax = await WooCommerce.get("taxes");
-            
             let findTax = (taxClass, taxes)=>{
                 return tax.data.filter((c) => c.name.toLowerCase() === taxClass.toLowerCase());
             }
@@ -179,7 +178,7 @@ let productColor = async (credentials, product) => {
         resultProducts.push({...product, variations: variations});
     } else {
         let existColors = getColors(product);
-        if (existColors.length > 0) {
+        if (existColors.length > 1) {
             const name = product.name;
             let variationsColor = await getVariationsProduct(credentials, product);
             for (const color of existColors) {
@@ -240,7 +239,7 @@ let variantsColor = async (credentials, products) => {
                 resultProducts.push({...product, variations: variations});
             } else {
                 let existColors = getColors(product);
-                if (existColors.length > 0) {
+                if (existColors.length > 1) {
                     const name = product.name;
                     let variationsColor = await getVariationsProduct(credentials, product);
                     for (const color of existColors) {
@@ -300,7 +299,7 @@ let imageColor = async (credentials, products) => {
             resultProducts.push(product);
         } else {
             let existColors = getColors(product);
-            if (existColors.length > 0) {
+            if (existColors.length > 1) {
                 let variationsColor = await getVariationsProduct(credentials, product);
                 for (const color of existColors) {  
                     let variat = variationsColor.filter(p => {
