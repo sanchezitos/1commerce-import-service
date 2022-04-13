@@ -84,7 +84,7 @@ let productsColor = async (credentials, products) => {
             resultProducts.push(product);
         } else {
             let existColors = getColors(product);
-            if (existColors.length > 0) {
+            if (existColors.length > 1) {
                 const name = product.name;
                 for (const color of existColors) {
                     resultProducts.push({
