@@ -118,13 +118,25 @@ let getVariationsProduct = (credentials, pro) => {
             credentials.queryStringAuth = true;
             credentials.verifySsl =  false;
             let WooCommerce = new services.WooCommerceRestApi(credentials);
-            let products = await WooCommerce.get(`products/${pro.id}/variations`);
             let tax = await WooCommerce.get("taxes");
             let findTax = (taxClass, taxes)=>{
                 return tax.data.filter((c) => c.name.toLowerCase() === taxClass.toLowerCase());
             }
+            let variations = [];
+            if (pro.variations.length > 10 ) {
+                const number = Math.ceil(pro.variations.length / 10);
+                for (let i = 1; i <= number; i++) {
+                    const response = await WooCommerce.get(`products/${pro.id}/variations`, { per_page: 10, page: i });
+                    for (const pro of response.data) {
+                        variations.push(pro);
+                    }
+                }
+            } else {
+                const products = await WooCommerce.get(`products/${pro.id}/variations`);
+                variations = products;
+            }
 
-            let results = products.data.map((p)=>{
+            let results = variations.map((p)=>{
                 let tx = findTax(p.tax_class, tax);
                 if(!tx || tx.length == 0){
                     p.tax = tax.data.filter(t=>t.class === 'standard')[0]
@@ -146,6 +158,7 @@ let getProductId = (credentials, id) => {
             credentials.verifySsl =  false;
             let WooCommerce = new services.WooCommerceRestApi(credentials);
             let products = await WooCommerce.get(`products/${id}`);
+
             let tax = await WooCommerce.get("taxes");
             let findTax = (taxClass, taxes)=>{
                 return tax.data.filter((c) => c.name.toLowerCase() === taxClass.toLowerCase());
@@ -159,7 +172,6 @@ let getProductId = (credentials, id) => {
 
             let product = products.data && products.data.status == "publish" ? products.data : {};
             const resultProducts = product.id ? await productColor(credentials, product) : [];
-
             let rs = {
                 data: resultProducts
             }
@@ -182,12 +194,13 @@ let productColor = async (credentials, product) => {
             const name = product.name;
             let variationsColor = await getVariationsProduct(credentials, product);
             for (const color of existColors) {
-                let variat =variationsColor.filter(p => {
+                let variat = variationsColor.filter(p => {
                     let colorVariation = getColors(p);
                     if (colorVariation[0] == color) {
                         return p;
                     }
                 })
+
                 let imagesProduct = product.image ? [product.image] : product.images;
                 resultProducts.push({
                     ...product,
