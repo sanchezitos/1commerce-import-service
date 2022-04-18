@@ -132,8 +132,8 @@ let getVariationsProduct = (credentials, pro) => {
                     }
                 }
             } else {
-                const products = await WooCommerce.get(`products/${pro.id}/variations`);
-                variations = products;
+                const response = await WooCommerce.get(`products/${pro.id}/variations`);
+                variations = response.data;
             }
 
             let results = variations.map((p)=>{
