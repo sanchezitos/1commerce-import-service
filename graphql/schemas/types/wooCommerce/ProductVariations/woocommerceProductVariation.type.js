@@ -8,7 +8,7 @@ let WoocommerceProductVariationType = new GraphQLObjectType({
   name: 'WoocommerceProductVariationType',
   fields: () => ({
     price:{ type:GraphQLInt, resolve:(obj, args, context, info)=>{
-      return obj.regular_price ? parseInt(obj.regular_price == "" ? 0 : obj.regular_price) :  parseInt(obj.price)
+      return obj.regular_price ? parseInt(obj.regular_price == "" ? 0 : obj.regular_price) : obj.price ? parseInt(obj.price) : 0
     }},
     talla:{ type:GraphQLString, resolve:(obj, args, context, info)=>{
       if(obj.attributes &&  obj.attributes.length > 0){
