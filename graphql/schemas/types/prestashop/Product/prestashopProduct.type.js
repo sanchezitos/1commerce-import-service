@@ -3,22 +3,18 @@ const {
     GraphQLString,
     GraphQLBoolean,
     GraphQLInt,
-    GraphQLList
   } = require('graphql');
-  
-
   const stripHtml = require("string-strip-html");
   const PrestashopTaxType =  require('./prestashopTaxType');
-  const PrestashopImageProductType = require('../ProductImages/prestashopProductImage.type');
   
   let PrestashopProductType = new GraphQLObjectType({
     name: 'PresthashopProductType',
     fields: () => ({
       name: {type: GraphQLString, resolve: (obj, args, context, info) => {
-          return obj.name
+        return obj.name
       }},
       externalId: { type: GraphQLString,  resolve:(obj, args, context, info)=>{
-          return obj.id.toString();
+        return obj.id.toString();
       }},  
       reference:{ type:GraphQLString, resolve:(obj, args, context, info)=>{
         return obj.reference ? obj.reference.trim() : "";
@@ -52,10 +48,7 @@ const {
       }}, //Largo del Empaque del Producto
       weight:{ type:GraphQLInt, resolve:(obj, args, context, info)=>{
         return parseInt(obj.weight);
-      } }, //Peso del Empaque del Producto
-      images:{ type:new GraphQLList(PrestashopImageProductType), resolve:(obj, args, context, info)=>{
-        return obj.images;
-      }},
+      } }
     }),
   });
   

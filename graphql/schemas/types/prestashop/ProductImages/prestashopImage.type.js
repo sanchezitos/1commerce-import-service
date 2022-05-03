@@ -4,11 +4,11 @@ const {
 } = require('graphql');
 const path = require("path");
 
-let PrestashopImageProductType = new GraphQLObjectType({
-  name: 'PrestashopImageProductType',
+let PrestashopProductImageType = new GraphQLObjectType({
+  name: 'PrestashopProductImageType',
   fields: () => ({
     file : { type: GraphQLString, resolve : (obj, args, context, info)=>{
-    return obj.file;
+      return obj.file;
     }},
     src : { type: GraphQLString , resolve : (obj, args, context, info)=>{
       return obj.src
@@ -16,4 +16,4 @@ let PrestashopImageProductType = new GraphQLObjectType({
   })
 });
 
-module.exports = PrestashopImageProductType;
+module.exports = PrestashopProductImageType;

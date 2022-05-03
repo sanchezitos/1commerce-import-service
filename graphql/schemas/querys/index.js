@@ -21,6 +21,7 @@ const VtexOrderId = require('./Vtex/vtexOrderId.query');
 
 const PrestashopProducts = require('./Prestashop/prestashopProduct.query.js');
 const PrestashopProductVariation = require('./Prestashop/prestashopProductVariation.query');
+const PrestashopProductImage = require('./Prestashop/prestashopProductImage.query');
 const PrestashopProductId = require('./Prestashop/prestashopProductId.query');
 const PrestashopOrderId = require('./Prestashop/prestashopOrderId.query');
 
@@ -56,6 +57,7 @@ module.exports = {
         VtexOrderId,
         PrestashopProducts,
         PrestashopProductVariation,
+        PrestashopProductImage,
         PrestashopProductId,
         PrestashopOrderId,
         MagentoPagination,

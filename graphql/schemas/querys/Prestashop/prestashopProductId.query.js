@@ -1,6 +1,6 @@
 const { getProductId } = require('../../../../controllers/Prestashop.controller');
 const { getToken, validate}  = require('../../../../util/auth.util');
-const PrestashopProductIdType  = require('../../types/prestashop/ProductId/prestashopProductId.type');
+const PrestashopProductIdType  = require('../../types/prestashop/ProductId/prestashopProductIdListType');
 const {
   GraphQLString
 } = require('graphql');
