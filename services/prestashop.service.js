@@ -75,6 +75,7 @@ let getData = (credentials, limits) => {
         resolve(null);
     });
 }
+
 let getCount = (credentials, limits) => {
     return new Promise(async (resolve, reject) => {
         let response;
@@ -101,7 +102,6 @@ let getCount = (credentials, limits) => {
         resolve(null);
     });
 }
-
 
 let getTaxes = (credentials) => {
         return new Promise(async (resolve, reject) => {
@@ -154,6 +154,7 @@ let getDiscounts = (credentials) => {
         resolve(null);
 });
 }
+
 let getDiscountNames = (credentials) => {
     return new Promise(async (resolve, reject) => {
         let response;
@@ -258,7 +259,7 @@ let getCombinations = (credentials,product_id) => {
 });
 }
 
-let getAttributes = (credentials,id) => {
+let getAttributes = (credentials) => {
     return new Promise(async (resolve, reject) => {
         let response;
         try {

@@ -1,17 +1,17 @@
 const {
-    GraphQLObjectType,
-    GraphQLList
+  GraphQLObjectType,
+  GraphQLInt,
+  GraphQLList,
 } = require('graphql');
-const path = require("path");
-const PrestashopImgProductType = require('./prestashopProductImage.type');
 
-let PrestashopImageProductType = new GraphQLObjectType({
-  name: 'PrestashopImgProductType',
+const prestashopProductImg = require('./prestashopProductImg.type');
+const PrestashopProductImageListType = new GraphQLObjectType({
+  name: 'PrestashopProductImageListType',
   fields: () => ({
-    images : {  type:new GraphQLList(PrestashopImgProductType), resolve:(obj, args, context, info)=>{
-        return obj;
-    }},
-  })
+    totalRecords: { type: GraphQLInt },
+    pagesCount: { type: GraphQLInt },
+    data: { type: new GraphQLList(prestashopProductImg) },
+  }),
 });
 
-module.exports = PrestashopImageProductType;
+module.exports = PrestashopProductImageListType;
