@@ -14,6 +14,7 @@ let WoocommerceProductVariationType = new GraphQLObjectType({
       if(obj.attributes &&  obj.attributes.length > 0){
         let attrs = obj.attributes;
         let size = attrs.filter(o=> (
+          o.name.toLowerCase() === 'tamano' ||
           o.name.toLowerCase() === 'talla' || 
           o.name.toLowerCase() === 'tamaño' || 
           o.name.toLowerCase() === 'size' ||
