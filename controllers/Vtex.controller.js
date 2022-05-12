@@ -330,7 +330,10 @@ let getQuantity = (credentials, skuId) => {
         apiKey: credentials.apiKey,
         password: credentials.password
       }, skuId);
-      let total = balance ? balance.totalQuantity - balance.reservedQuantity : 0
+      let total = 0;
+      for (const bal of balance) {
+        total += bal ? bal.totalQuantity - bal.reservedQuantity : 0
+      }
       return resolve(total < 0 ? 0 : total);
 
     } catch (error) {
@@ -396,6 +399,7 @@ let getProductId = (credentials, productId) => {
       product.name = product.Name;
       product.skus = variation ? variation.skus : [];
       product.discounts = discounts;
+
       return resolve(product);
     } catch (error) {
       reject(error);

@@ -252,7 +252,7 @@ let getQuantity = (credentials, skuId) => {
             console.log(error);
         }
         if(response && response.data){
-            return resolve(response.data.balance[0]);
+            return resolve(response.data.balance);
         }
         resolve(undefined);
     });
