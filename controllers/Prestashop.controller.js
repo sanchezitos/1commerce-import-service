@@ -32,7 +32,6 @@ let getProducts = (credentials, listing) => {
 
             let resultOptions = optionsCms.filter(option => option.name.toLowerCase().includes('color'))
             let resultOptionsMarca = optionsCms.filter(option => option.name.toLowerCase().includes('marca'))
-            
             for (const option of resultOptions) {
                 optionColor = [...optionColor, ...option.associations.product_option_values];
             }
@@ -92,14 +91,14 @@ let productsColor = async (products, attributes, colors, marcas) => {
                         reference: product.reference.trim() + '-' + color,
                         name: name + ' ' + color,
                         color: color,
-                        manufacturer_name: result.marca
+                        manufacturer_name: result.marca || product.manufacturer_name
                     });
                 }
             } else {
                 resultProducts.push({
                     ...product,
-                    color: result.resultColors[0].replace(/\s/g, '').replace(/[0-9]/g, '').replace(/-/g, ''),
-                    manufacturer_name: result.marca
+                    color: result.resultColors && result.resultColors.length > 0 ? result.resultColors[0].replace(/\s/g, '').replace(/[0-9]/g, '').replace(/-/g, '') : '',
+                    manufacturer_name: result.marca || product.manufacturer_name
                 });
             }
         } else {
@@ -246,7 +245,7 @@ let variantsColor = async (credentials, products, attributes, colors) => {
                 for (let color of result.resultColors) {
                     let variat = variationsColor.filter(p => {
                         let colorVariation = getColors(p.associations.product_option_values, attributes, colors);
-                        if (colorVariation.resultColors[0] == color) {
+                        if (colorVariation.resultColors.length > 0 && colorVariation.resultColors[0] == color) {
                             return p;
                         }
                     })
@@ -314,7 +313,7 @@ let imageColor = async (credentials, products, attributes, colors) => {
                 for (let color of result.resultColors) {
                     let variat = variationsColor.filter(p => {
                         let colorVariation = getColors(p.associations.product_option_values, attributes, colors);
-                        if (colorVariation.resultColors[0] == color) {
+                        if (colorVariation.resultColors.length > 0 && colorVariation.resultColors[0] == color) {
                             return p;
                         }
                     })
@@ -370,8 +369,8 @@ let getProductId = (credentials, productId) => {
             let tax_rules = await services.Prestashop.getIdTaxes(credentials);
             let taxes = await services.Prestashop.getTaxes(credentials);
             let discounts = await services.Prestashop.getDiscounts(credentials);
-            let optionsCms = await services.Prestashop.getOptions(credentials);
             let discount_names = await services.Prestashop.getDiscountNames(credentials);
+            let optionsCms = await services.Prestashop.getOptions(credentials);
             let quantities = await services.Prestashop.getQuantities(credentials);
             let attributes = await services.Prestashop.getAttributes(credentials);
             let combinations;
@@ -487,7 +486,7 @@ let productColor = async (credentials, product, attributes, colors, marcas) => {
             for (let color of result.resultColors) {
                 let variat = variationsColor.filter(p => {
                     let colorVariation = getColors(p.associations.product_option_values, attributes, colors);
-                    if (colorVariation.resultColors[0] == color) {
+                    if (colorVariation.resultColors.length > 0 && colorVariation.resultColors[0] == color) {
                         return p;
                     }
                 })
@@ -498,7 +497,7 @@ let productColor = async (credentials, product, attributes, colors, marcas) => {
                     id: product.id + '-' + color,
                     name: name + ' ' + color,
                     color: color,
-                    manufacturer_name: result.marca,
+                    manufacturer_name: result.marca || product.manufacturer_name,
                     variations: variat,
                     images: images.length > 0 ? images : resultImages(product, credentials)
                 });
@@ -510,9 +509,9 @@ let productColor = async (credentials, product, attributes, colors, marcas) => {
                 ...product,
                 variations: variations,
                 images: images,
-                color: result.resultColors[0].replace(/\s/g, '').replace(/[0-9]/g, '').replace(/-/g, ''),
-                manufacturer_name: result.marca
-            });
+                color: result.resultColors.length > 0 ? result.resultColors[0].replace(/\s/g, '').replace(/[0-9]/g, '').replace(/-/g, '') : '',
+                manufacturer_name: result.marca || product.manufacturer_name
+            }); 
         }
     } catch (error) {
         console.log(error);
