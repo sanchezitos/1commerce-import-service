@@ -172,6 +172,7 @@ let getProductId = (credentials, id) => {
 
             let product = products.data && products.data.status == "publish" ? products.data : {};
             const resultProducts = product.id ? await productColor(credentials, product) : [];
+            
             let rs = {
                 data: resultProducts
             }
