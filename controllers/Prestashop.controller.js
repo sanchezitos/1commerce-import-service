@@ -97,7 +97,7 @@ let productsColor = async (products, attributes, colors, marcas) => {
             } else {
                 resultProducts.push({
                     ...product,
-                    color: result.resultColors.length > 0 ? result.resultColors[0].replace(/\s/g, '').replace(/[0-9]/g, '').replace(/-/g, '') : '',
+                    color: result.resultColors && result.resultColors.length > 0 ? result.resultColors[0].replace(/\s/g, '').replace(/[0-9]/g, '').replace(/-/g, '') : '',
                     manufacturer_name: result.marca || product.manufacturer_name
                 });
             }
