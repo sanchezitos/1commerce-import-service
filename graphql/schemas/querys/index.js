@@ -35,6 +35,10 @@ const MercadolibreProducts = require('./Mercadolibre/mercadolibreProduct.query')
 const MercadolibreProductVariation = require('./Mercadolibre/mercadolibreProductVariation.query');
 const MercadolibreProductImage = require('./Mercadolibre/mercadolibreProductImage.query');
 
+const SiesaPagination = require('./Siesa/siesaPagination.query');
+const SiesaProducts = require('./Siesa/siesaProduct.query');
+const SiesaProductVariation = require('./Siesa/siesaProductVariation.query');
+
 module.exports = {
     public: {
         WooCommercePagination,
@@ -67,6 +71,9 @@ module.exports = {
         MercadolibrePagination,
         MercadolibreProducts,
         MercadolibreProductVariation,
-        MercadolibreProductImage
+        MercadolibreProductImage,
+        SiesaPagination,
+        SiesaProducts,
+        SiesaProductVariation,
     }
 }
