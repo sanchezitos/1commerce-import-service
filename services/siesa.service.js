@@ -1,5 +1,4 @@
 let logger;
-const axios = require('axios');
 let soap = require('strong-soap').soap;
 
 let init = async (app, locals) => {
@@ -31,7 +30,7 @@ let getPaginate = (credentials, params) => {
       cantidadRegistros: 5,
     };
 
-    let options = { endpoint: credentials.url};
+    let options = { endpoint: credentials.url, timeout: 1200000};
     soap.createClient(url, options, (err, client) =>{
       let method = client['OUT_ListadoMaestroItems'];
       if(err){resolve(null);}
@@ -55,7 +54,7 @@ let getProducts = (credentials, params) => {
       cantidadRegistros: params.pagination.pageSize,
     };
 
-    let options = { endpoint: credentials.url};
+    let options = { endpoint: credentials.url, timeout: 1200000};
     soap.createClient(url, options, (err, client) =>{
       let method = client['OUT_ListadoMaestroItems'];
       if(err){resolve(null);}
@@ -80,7 +79,7 @@ let getVariations = (credentials, params) => {
       cantidadRegistros: params.pagination.pageSize,
     };
 
-    let options = { endpoint: credentials.url};
+    let options = { endpoint: credentials.url, timeout: 1200000};
     soap.createClient(url, options, (err, client) =>{
       let method = client['OUT_ListadoInventarioItems'];
       if(err){resolve(null);}
